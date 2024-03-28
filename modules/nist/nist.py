@@ -8,7 +8,7 @@ nvd_sources = [
 ]
 
 
-WEBHOOK_URL = "https://discord.com/api/webhooks/1215909945057218669/XDsT82W5wCClgxykGUrhs44ByFiUJaFlWsUzvV7T4Fv8uHjFaNDPDN4GUwjK8Trrlb55" 
+WEBHOOK_URL = "" 
 MESSAGE_USERNAME = "CVETICKER"        #username that will be displayed when the embeded message is output into the channel
 
 
