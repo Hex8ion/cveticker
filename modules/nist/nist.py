@@ -13,10 +13,9 @@ webhook_list = [
 
 ]
 
-
-MESSAGE_USERNAME = "CVE"              #username that will be displayed when the embeded message is output into the channel
+MESSAGE_USERNAME = "CVE"        #username that will be displayed when the embeded message is output into the channel
 content = ""                          #text that will be sent as an actual message outside the embed
-CVSS_SCORE_FILTER = 6                 #Value used to compare results to, if the CVSS is higher or equal to this value, an embed will be sent
+CVSS_SCORE_FILTER = 8.5
 
 
 
@@ -89,7 +88,7 @@ def get_lastquery(loaded_db:dict):
     return loaded_db['timestamp']
 
 
-def parse_send(webhook:str, db_data:dict, index:int) -> None:
+def parse_send(db_data:dict, index:int) -> None:
     db_data = db_data['vulnerabilities'][index]['cve']
     cve_id = db_data['id']
     cve_published = db_data['published']
@@ -103,20 +102,24 @@ def parse_send(webhook:str, db_data:dict, index:int) -> None:
     cvss_attackvector = db_data['metrics']['cvssMetricV31'][0]['cvssData']['attackVector']
     references = db_data['references'][0]['url']
 
+    
+
     if cvss_score >= CVSS_SCORE_FILTER:
-        send_discord_message(
-            webook,
-            cve_id,
-            str(cvss_score), 
-            cve_published, 
-            cve_description, 
-            cvss_privilegesRequired, 
-            cvss_userinteraction, 
-            cvss_severity, 
-            references, 
-            cvss_attackvector
-            )
-        #print(f"{cve_id} {cvss_score}")
+        for each in webhook_list:
+            print(cve_id)
+            send_discord_message(
+                each,
+                cve_id,
+                str(cvss_score), 
+                cve_published, 
+                cve_description, 
+                cvss_privilegesRequired, 
+                cvss_userinteraction, 
+                cvss_severity, 
+                references, 
+                cvss_attackvector
+                )
+            #print(f"{cve_id} {cvss_score}")
 
 
 if __name__ == "__main__":
@@ -128,7 +131,7 @@ if __name__ == "__main__":
         db_data = load_db()
         print("[*]Database has been loaded.")
         lastquery = get_lastquery(db_data)
-        #lastquery = "2024-04-04T06:37:27.140"
+        #lastquery = "2024-04-07T17:59:00.593"
         print(f"[*]Last query was {lastquery}")
         date_time = get_datetime()
         print(f"[*]Current Date/Time is {date_time}")
@@ -137,23 +140,24 @@ if __name__ == "__main__":
         print(query_data)
 
 
-        if query_data != None:
-            for i in range(query_data['totalResults']):
-                try:
-                    for webhook in webhook_list:
-                        parse_send(webhook, db_data, i)
-                        #print(webhook)
-                    #print(query_data['vulnerabilities'])
-                except:
-                    pass
-                    #if db_data['vulnerabilities'] == None:
-                        #print("none")
-                        
-                else:
-                    pass
-            populate_db(query_data)
-        else:
+        if query_data == None:
             pass
-        time.sleep(60 * 120)
 
+        for i in range(query_data['totalResults']):
+            try: 
+
+                parse_send(db_data, i)
+                #print(webhook)
+                
+            #print(query_data['vulnerabilities'])
+            except:
+                pass
+                #if db_data['vulnerabilities'] == None:
+                    #print("none")
+                    
+            else:
+                pass
+        populate_db(query_data)
+
+        time.sleep(60 * 120)
 
